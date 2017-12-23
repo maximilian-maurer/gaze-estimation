@@ -55,9 +55,7 @@ def calculate_rotation_matrix(theta, phi, kappa):
                   [     0,             0,         1]])
 
     # R_eye = R_flip * R_theta * R_phi * R_kappa
-    flip_theta = np.dot(R_flip, R_theta)
-    flip_theta_phi = np.dot(flip_theta, R_phi)
-    R_eye = np.dot(flip_theta_phi, R_kappa)
+    R_eye = np.linalg.multi_dot([R_flip, R_theta, R_phi, R_kappa])
 
     return R_eye
 

@@ -39,6 +39,7 @@ def transform_2D_to_3D(x, y,
 
     return x_ccs, y_ccs, z_ccs
 
+
 def transform_3D_to_3D(input_coordinates,
                        alpha_rad, beta_rad, gamma_rad,
                        shift_of_zero):
@@ -68,3 +69,19 @@ def transform_3D_to_3D(input_coordinates,
 
     return output_coordinates
 
+
+def inverse_transform_3D_to_3D(input_coordinates, alpha_rad, beta_rad, gamma_rad, shift_of_zero):
+    """
+    Applies the inverse transformation to transform_3D_to_3D.
+
+    :param input_coordinates: A vector that has been rotated by the given angles and subsequently shifted
+    :param alpha_rad: rotation Angle
+    :param beta_rad: rotation Angle
+    :param gamma_rad: rotation Angle
+    :param shift_of_zero: zero shift
+    :return: 3D point in CS_in
+    """
+    R = calculate_rotation_matrix_extrinsic(alpha_rad, beta_rad, gamma_rad)
+    inverse_R = np.linalg.inv(R)
+
+    return np.dot(inverse_R, input_coordinates) - shift_of_zero
