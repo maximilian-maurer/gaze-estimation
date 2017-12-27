@@ -48,7 +48,7 @@ class TestCalculateC(unittest.TestCase):
             'n1': 1.3375,
             'n2': 1,
             'distance_to_camera_cm': 52,
-            'camera_angle': math.radians(8)
+            'camera_rotation': (0, 0, 0)
         }
 
         # point4

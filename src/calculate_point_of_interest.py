@@ -12,6 +12,7 @@ from src.calculate_cornea_center import calculate_cornea_center
 from src.calculate_optic_axis import calculate_optic_axis_unit_vector
 from src.calculate_visual_axis import calculate_visual_axis_unit_vector
 from src.coordinate_system_transformations import transform_3D_to_3D
+from src.rotation_matrix import calculate_rotation_matrix_extrinsic
 
 
 def transform_to_screen_coordinate_system(center_of_cornea_curvature, visual_axis_unit_vector, angles_rad):
@@ -37,7 +38,7 @@ def calculate_point_of_interest(center_of_cornea_curvature, visual_axis_unit_vec
     Based on formula 2.31 and 3.61 calculations.
 
     :param center_of_cornea_curvature: center of cornea curvature
-    :param optic_axis_unit_vector: unit vector of optic axis
+    :param visual_axis_unit_vector: unit vector of visual axis in WCS
     :param z_shift: z offset of the screen
     """
 
@@ -60,10 +61,14 @@ def get_point_of_interest(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
     :param kwargs: constants dictionary (check in integration_test.constants for an example)
     """
 
-    center_of_cornea_curvature =  calculate_cornea_center(glint_1_ics, glint_2_ics, **kwargs)
+    center_of_cornea_curvature = calculate_cornea_center(glint_1_ics, glint_2_ics, **kwargs)
 
     pupil_on_image_wgs = \
         transform_2D_to_3D(*pupil_center_ics, kwargs['focal_length_cm'], *kwargs['pixel_size_cm'], *kwargs['principal_point'])
+
+    R_cam = calculate_rotation_matrix_extrinsic(*(kwargs['camera_rotation']))
+
+    pupil_on_image_wgs = np.dot(R_cam, pupil_on_image_wgs)
 
     optic_axis_unit_vector = calculate_optic_axis_unit_vector(pupil_on_image_wgs,
                                                               kwargs['camera_position_wcs'],
@@ -78,13 +83,9 @@ def get_point_of_interest(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
                                           kwargs['alpha_right'],
                                           kwargs['beta'])
 
-    # transform to coordinate system aligned with screen
-    center_of_cornea_curvature_scs, visual_axis_unit_vector_scs = \
-        transform_to_screen_coordinate_system(center_of_cornea_curvature, visual_axis_unit_vector, kwargs['camera_rotation'])
-
     point_of_interest = \
-        calculate_point_of_interest(center_of_cornea_curvature_scs,
-                                    visual_axis_unit_vector_scs,
+        calculate_point_of_interest(center_of_cornea_curvature,
+                                    visual_axis_unit_vector,
                                     kwargs['z_shift'])
 
     return point_of_interest

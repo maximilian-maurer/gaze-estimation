@@ -9,6 +9,7 @@ import numpy as np
 import scipy.optimize as opt
 
 from src.coordinate_system_transformations import transform_2D_to_3D
+from src.rotation_matrix import calculate_rotation_matrix_extrinsic
 
 
 def normalized(vector):
@@ -109,11 +110,15 @@ def calculate_cornea_center_wcs(u1_wcs, u2_wcs, o_wcs, l1_wcs, l2_wcs, R, initia
 
     return (c1 + c2)/2
 
-
 def calculate_cornea_center(u1_ics, u2_ics, **kwargs):
 
     u1_wcs = transform_2D_to_3D(*u1_ics, kwargs['focal_length_cm'], *kwargs['pixel_size_cm'], *kwargs['principal_point'])
     u2_wcs = transform_2D_to_3D(*u2_ics, kwargs['focal_length_cm'], *kwargs['pixel_size_cm'], *kwargs['principal_point'])
+
+    R_cam = calculate_rotation_matrix_extrinsic(*kwargs['camera_rotation'])
+
+    u1_wcs = np.dot(R_cam, u1_wcs)
+    u2_wcs = np.dot(R_cam, u2_wcs)
 
     Kq1_init = kwargs['distance_to_camera_cm']
     Kq2_init = kwargs['distance_to_camera_cm']
