@@ -1,5 +1,6 @@
 from math import cos, sin
 import numpy as np
+import math
 
 
 def calculate_rotation_matrix_extrinsic(alpha_rad, beta_rad, gamma_rad):
@@ -37,19 +38,27 @@ def calculate_rotation_matrix_extrinsic(alpha_rad, beta_rad, gamma_rad):
     3x3 rotational matrix
     """
 
-    Rx = [[1,    0,             0    ],
+    Rx = [[1, 0, 0],
           [0, cos(alpha_rad), -sin(alpha_rad)],
-          [0, sin(alpha_rad),  cos(alpha_rad)]]
+          [0, sin(alpha_rad), cos(alpha_rad)]]
 
-    Ry = [[cos(beta_rad),  0, sin(beta_rad) ],
-          [    0,          1,      0        ],
+    Ry = [[cos(beta_rad), 0, sin(beta_rad)],
+          [0, 1, 0],
           [-sin(beta_rad), 0, cos(beta_rad)]]
 
     Rz = [[cos(gamma_rad), -sin(gamma_rad), 0],
-          [sin(gamma_rad),  cos(gamma_rad), 0],
-          [    0,                  0,       1]]
+          [sin(gamma_rad), cos(gamma_rad), 0],
+          [0, 0, 1]]
 
     R = np.dot(np.dot(Rz, Ry), Rx)
 
     return R
 
+
+def euler_angles_from_rotation_matrix(R):
+    """ Returns euler angles from the given 3x3 rotation matrix """
+    angle_x = math.atan2(R[2][1], R[2][2])
+    angle_y = math.atan2(-R[2][0], math.sqrt(R[2][1] ** 2 + R[2][2] ** 2))
+    angle_z = math.atan2(R[1][0], R[0, 0])
+
+    return angle_x, angle_y, angle_z
