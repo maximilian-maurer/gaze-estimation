@@ -311,7 +311,11 @@ def generate_sample_points_1c_2l(light_1_position, light_2_position, camera_posi
     """
     effective_focal_length = calculate_effective_focal_length(camera_focal_length, optic_axis_intersection,
                                                               camera_position)
+    constants['focal_length_cm'] = effective_focal_length
+
     R_cam = calculate_camera_rotation_matrix(camera_position, optic_axis_intersection)
+
+
     po_reflection_ics, po_refraction_ics = generate_camera_light_points(eyeball_center=eyeball_center,
                                                                         point_of_gaze=point_of_gaze,
                                                                         camera_position=camera_position,
