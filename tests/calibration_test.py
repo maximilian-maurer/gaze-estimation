@@ -1,6 +1,7 @@
 import itertools
 import math
 import unittest
+from multiprocessing import Pool
 
 import numpy as np
 
@@ -9,6 +10,9 @@ from src.calibration import calibrate_multi_point, poi_estimation_error
 from src.generate_eye_data import generate_sample_points_1c_2l, calculate_effective_focal_length, \
     calculate_camera_rotation_matrix
 from src.rotation_matrix import euler_angles_from_rotation_matrix
+
+import csv
+
 
 class TestCalibration(unittest.TestCase):
     """
@@ -32,7 +36,7 @@ class TestCalibration(unittest.TestCase):
             'principal_point': (695.5, 449.5),
             'pixel_size_cm': (4.65 * 1e-6, 4.65 * 1e-6)
         }
-        light_1_position = np.array([-25, 10, 0])
+        light_1_position = np.array([-25, 5, 0])
         light_2_position = np.array([25, 5, 0])
         camera_position = np.array([0, -21, 2])
         camera_focal_length = 0.035
@@ -143,13 +147,17 @@ class TestCalibration(unittest.TestCase):
 
     def test_calibrate_multi_point(self):
         constants, light_1_position, light_2_position, \
-            camera_position, camera_focal_length, \
-            eyeball_center, optic_axis_intersection, wcs_offset = self.fill_test_constants()
+        camera_position, camera_focal_length, \
+        eyeball_center, optic_axis_intersection, wcs_offset = self.fill_test_constants()
 
         # add some other tests with all three varying for good measure
-        alpha_eyes = np.radians(np.linspace(-4, -6, 4))
-        beta_eyes = np.radians(np.linspace(0.8, 1.5, 4))
-        R_eyes = np.linspace(0.5, 1.0, 4)
+        alpha_eyes = np.radians(np.linspace(-4, -6, 5))
+        beta_eyes = np.radians(np.linspace(0.5, 2.5, 5))
+
+        R_base = 0.781
+        R_range = 0.036 / 2 * 4
+
+        R_eyes = np.linspace(R_base - R_range / 2, R_base + R_range / 2, 10)
         random_tests = list(itertools.product(alpha_eyes, beta_eyes, R_eyes))
 
         test_sets = [(np.radians(-5), np.radians(1.5), 0.78),  # already correct
@@ -170,8 +178,8 @@ class TestCalibration(unittest.TestCase):
             # generate calibration points
             input_points = []
             true_pogs = []
-            samplesX = 2
-            samplesY = 2
+            samplesX = 3
+            samplesY = 3
             for i, j in np.ndindex(samplesX, samplesY):
                 point_of_gaze = np.array([-20 + (40 / samplesX) * i, -15 + (30 / samplesY) * j, 0])
                 pupil, glint_1, glint_2 = generate_sample_points_1c_2l(light_1_position=light_1_position,
@@ -190,9 +198,9 @@ class TestCalibration(unittest.TestCase):
             constants['beta'] = math.radians(1.5)
             constants['R_cm'] = 0.78
 
-            calib_alpha, calib_beta, calib_R = calibrate_multi_point(input_points,
-                                                                     true_pogs,
-                                                                     **constants)
+            calib_alpha, calib_beta, calib_R, solution = calibrate_multi_point(input_points,
+                                                                               true_pogs,
+                                                                               **constants)
 
             print("------")
             print(math.degrees(alpha), math.degrees(calib_alpha))

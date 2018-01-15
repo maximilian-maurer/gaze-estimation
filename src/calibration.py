@@ -62,13 +62,16 @@ def calibrate_multi_point(input_points, true_pois, **kwargs):
 
     # todo: review of the bounds
     # todo: review of acceptable termination tolerance
-    solution = opt.minimize(poi_estimation_error, initial_solution, input_data,
-                            bounds=[(np.radians(-10), np.radians(10)),
-                                    (np.radians(-10), np.radians(10)),
-                                    (0.01, 3)])  # corneal curvature radius can't be negative)
-
-
+    #solution = opt.minimize(poi_estimation_error, initial_solution, input_data,
+    #                        options={'ftol':1e-9},
+    #                        method='L-BFGS-B',
+    #                        bounds=[(np.radians(-100), np.radians(100)),
+    #                                (np.radians(0), np.radians(10)),
+    #                                (0.58, 0.98)])  # corneal curvature radius can't be negative)
+    solution= opt.differential_evolution(poi_estimation_error,
+        bounds=[(np.radians(-10), np.radians(10)), (np.radians(-10), np.radians(10)),(0.58, 0.98)],#initial_solution,
+        args=input_data)
     #if not solution.success:
     #    raise Exception("No solution found.")
-
-    return solution.x
+    a,b,r = solution.x
+    return a,b,r, solution
