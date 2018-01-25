@@ -125,7 +125,8 @@ class TestCalibration(unittest.TestCase):
                                                                            point_of_gaze=p_1_pog,
                                                                            constants=constants)
         input_rows = [[p_1_glint_1, p_1_glint_2, p_1_pupil, p_1_pog + wcs_offset]]
-        error = poi_estimation_error([constants['alpha'], constants['beta'], constants['R_cm']],
+        error = poi_estimation_error([constants['alpha'], constants['beta'], constants['R_cm'], constants['K_cm'],
+                                      constants['camera_rotation'][1], constants['camera_rotation'][2]],
                                      input_rows, constants)
         self.assertAlmostEqual(0, error)
 
@@ -141,7 +142,8 @@ class TestCalibration(unittest.TestCase):
                                                                            constants=constants)
         input_rows = [[p_1_glint_1, p_1_glint_2, p_1_pupil, p_1_pog + wcs_offset],
                       [p_2_glint_1, p_2_glint_2, p_2_pupil, p_2_pog + wcs_offset]]
-        error = poi_estimation_error([constants['alpha'], constants['beta'], constants['R_cm']],
+        error = poi_estimation_error([constants['alpha'], constants['beta'], constants['R_cm'], constants['K_cm'],
+                                      constants['camera_rotation'][1], constants['camera_rotation'][2]],
                                      input_rows, constants)
         self.assertAlmostEqual(0, error)
 
@@ -198,9 +200,10 @@ class TestCalibration(unittest.TestCase):
             constants['beta'] = math.radians(1.5)
             constants['R_cm'] = 0.78
 
-            calib_alpha, calib_beta, calib_R, solution = calibrate_multi_point(input_points,
-                                                                               true_pogs,
-                                                                               **constants)
+            calib_alpha, calib_beta, calib_R, calib_K, calib_camera_angle_y, \
+                camera_calib_angle_z, solution = calibrate_multi_point(input_points,
+                                                                      true_pogs,
+                                                                      **constants)
 
             print("------")
             print(math.degrees(alpha), math.degrees(calib_alpha))

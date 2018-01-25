@@ -11,7 +11,7 @@ import numpy as np
 import itertools
 
 from src.calculate_point_of_interest import get_point_of_interest
-from src.calibration import calibrate_multi_point, poi_estimation_error
+from src.calibration import calibrate_multi_point, poi_estimation_error, calibrate_multi_point_fast
 
 eye_assumptions = {
     'alpha': math.radians(-5),
@@ -112,21 +112,27 @@ if __name__ == "__main__":
         screen_point_wcs = np.array([screen_x * screen_pixel_size_cm[0], -screen_y * screen_pixel_size_cm[1]])
         true_pogs.append(np.array([screen_point_wcs[0], screen_point_wcs[1], 0]) + wcs_offset)
 
-    calib_alpha, calib_beta, calib_R, solution = calibrate_multi_point(input_points,
-                                                                       true_pogs,
-                                                                       **constants)
+    calib_alpha, calib_beta, calib_R, calib_K, calib_camera_angle_y, \
+        calib_camera_angle_z, solution = calibrate_multi_point_fast(input_points,
+                                                                    true_pogs,
+                                                                    **constants)
 
     print("Calibration result:")
     print("---------------------")
     print("alpha", np.degrees(calib_alpha))
     print("beta", np.degrees(calib_beta))
     print("R", calib_R)
+    print("K", calib_K)
+    print("camera angle y", np.degrees(calib_camera_angle_y))
+    print("camera_angle_z", np.degrees(calib_camera_angle_z))
     print(solution)
 
     # use the calibrated constants
     constants['alpha'] = constants['alpha_right'] = calib_alpha
     constants['beta'] = calib_beta
-    constants['R'] = calib_R
+    constants['R_cm'] = calib_R
+    constants['K_cm'] = calib_K
+    constants['camera_rotation'] = (constants['camera_rotation'][0], calib_camera_angle_y, calib_camera_angle_z)
 
     true_pogs = []
     estimated_pogs = []

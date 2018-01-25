@@ -50,10 +50,10 @@ def calculate_point_of_interest(center_of_cornea_curvature, visual_axis_unit_vec
 
     return point_of_interest
 
-
-def get_point_of_interest(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
+def get_point_of_interest_extended(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
     """
-    End-to-end calculations.
+    End-to-end calculations. (This method provides intermediate values in addition to the result,
+    if those are not needed get_point_of_interest should be used instead)
 
     :param glint_1_ics: glint 1 coordinates in Image Coordinate System
     :param glint_2_ics: glint 2 coordinates in Image Coordinate System
@@ -88,5 +88,20 @@ def get_point_of_interest(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
                                     visual_axis_unit_vector,
                                     kwargs['z_shift'])
 
+    return point_of_interest, center_of_cornea_curvature
+
+
+
+def get_point_of_interest(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs):
+    """
+    End-to-end calculations.
+
+    :param glint_1_ics: glint 1 coordinates in Image Coordinate System
+    :param glint_2_ics: glint 2 coordinates in Image Coordinate System
+    :param pupil_center_ics: glint 2 coordinates in Image Coordinate System
+    :param kwargs: constants dictionary (check in integration_test.constants for an example)
+    """
+    point_of_interest, center_of_cornea_curvature = \
+        get_point_of_interest_extended(glint_1_ics, glint_2_ics, pupil_center_ics, **kwargs)
     return point_of_interest
 
