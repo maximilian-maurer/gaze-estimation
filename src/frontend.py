@@ -11,7 +11,7 @@ import numpy as np
 import itertools
 
 from src.calculate_point_of_interest import get_point_of_interest
-from src.calibration import calibrate_multi_point, poi_estimation_error, calibrate_multi_point_fast
+from src.calibration import calibrate_multi_point, poi_estimation_error
 
 eye_assumptions = {
     'alpha': math.radians(-5),
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         true_pogs.append(np.array([screen_point_wcs[0], screen_point_wcs[1], 0]) + wcs_offset)
 
     calib_alpha, calib_beta, calib_R, calib_K, calib_camera_angle_y, \
-        calib_camera_angle_z, solution = calibrate_multi_point_fast(input_points,
+        calib_camera_angle_z, solution = calibrate_multi_point(input_points,
                                                                     true_pogs,
                                                                     **constants)
 
